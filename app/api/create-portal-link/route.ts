@@ -19,6 +19,9 @@ export async function POST(req: Request) {
         email: user.email || ''
       });
 
+      console.log("Redirect domain");
+      console.log(getURL());
+
       if (!customer) throw Error('Could not get customer');
       const { url } = await stripe.billingPortal.sessions.create({
         customer,
