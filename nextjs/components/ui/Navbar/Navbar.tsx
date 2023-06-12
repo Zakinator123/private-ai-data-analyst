@@ -1,7 +1,7 @@
 import Link from 'next/link';
-import { createServerSupabaseClient } from '@/app/supabase-server';
+import { createServerSupabaseClient } from '@/nextjs/app/supabase-server';
 
-import Logo from '@/components/icons/Logo';
+import Logo from '@/nextjs/components/icons/Logo';
 import SignOutButton from './SignOutButton';
 
 import s from './Navbar.module.css';
