@@ -3,8 +3,8 @@ import {
   getSession,
   getUserDetails,
   getSubscription
-} from '@/nextjs/app/supabase-server';
-import Button from '@/nextjs/components/ui/Button';
+} from '@/app/supabase-server';
+import Button from '@/components/ui/Button';
 import { Database } from '../../types_db';
 import { createServerActionClient } from '@supabase/auth-helpers-nextjs';
 import { revalidatePath } from 'next/cache';

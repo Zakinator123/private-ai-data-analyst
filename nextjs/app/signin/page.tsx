@@ -1,8 +1,8 @@
-import { getSession } from '@/nextjs/app/supabase-server';
+import { getSession } from '@/app/supabase-server';
 import AuthUI from './AuthUI';
 
 import { redirect } from 'next/navigation';
-import Logo from '@/nextjs/components/icons/Logo';
+import Logo from '@/components/icons/Logo';
 
 export default async function SignIn() {
   const session = await getSession();

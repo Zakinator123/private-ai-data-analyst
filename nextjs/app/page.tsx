@@ -1,9 +1,9 @@
-import Pricing from '@/nextjs/components/Pricing';
+import Pricing from '@/components/Pricing';
 import {
   getSession,
   getSubscription,
   getActiveProductsWithPrices
-} from '@/nextjs/app/supabase-server';
+} from '@/app/supabase-server';
 
 export default async function PricingPage() {
   const [session, products, subscription] = await Promise.all([
