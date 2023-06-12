@@ -1,9 +1,9 @@
 'use client';
 
 import Button from '@/components/ui/Button';
-import { Database } from '@/types_db';
-import { postData } from '@/utils/helpers';
-import { getStripe } from '@/utils/stripe-client';
+import { Database } from '../types_db';
+import { postData } from '../utils/helpers';
+import { getStripe } from '../utils/stripe-client';
 import { Session, User } from '@supabase/supabase-js';
 import cn from 'classnames';
 import { useRouter } from 'next/navigation';

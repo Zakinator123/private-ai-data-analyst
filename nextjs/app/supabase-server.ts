@@ -1,4 +1,4 @@
-import { Database } from '@/types_db';
+import { Database } from '../types_db';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { cache } from 'react';

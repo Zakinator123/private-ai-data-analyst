@@ -1,9 +1,9 @@
 import { cookies } from 'next/headers';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { stripe } from '@/utils/stripe';
-import { createOrRetrieveCustomer } from '@/utils/supabase-admin';
-import { getURL } from '@/utils/helpers';
-import { Database } from '@/types_db';
+import { stripe } from '../../../utils/stripe';
+import { createOrRetrieveCustomer } from '../../../utils/supabase-admin';
+import { getURL } from '../../../utils/helpers';
+import { Database } from '../../../types_db';
 
 export async function POST(req: Request) {
   if (req.method === 'POST') {
@@ -25,7 +25,7 @@ export async function POST(req: Request) {
       if (!customer) throw Error('Could not get customer');
       const { url } = await stripe.billingPortal.sessions.create({
         customer,
-        return_url: `${getURL()}/account`
+        return_url: `${getURL()}account`
       });
       return new Response(JSON.stringify({ url }), {
         status: 200
