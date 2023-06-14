@@ -1,6 +1,6 @@
+import React from 'react';
 import Link from 'next/link';
 import { createServerSupabaseClient } from '@/app/supabase-server';
-
 import Logo from '@/components/icons/Logo';
 import SignOutButton from './SignOutButton';
 

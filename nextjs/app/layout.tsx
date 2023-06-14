@@ -1,7 +1,7 @@
 import SupabaseProvider from './supabase-provider';
 import Footer from '@/components/ui/Footer';
 import Navbar from '@/components/ui/Navbar';
-import { PropsWithChildren } from 'react';
+import React, { PropsWithChildren } from 'react';
 import '../styles/main.css';
 
 const meta = {
@@ -48,7 +48,6 @@ export default function RootLayout({
     <html lang="en">
       <body className="bg-black loading">
         <SupabaseProvider>
-          {/* @ts-expect-error */}
           <Navbar />
           <main
             id="skip"
