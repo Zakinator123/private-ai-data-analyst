@@ -3,7 +3,7 @@
 .idea/
 
 # dependencies
-/node_modules
+nextjs/node_modules
 /.pnp
 .pnp.js
 
@@ -11,8 +11,8 @@
 /coverage
 
 # next.js
-/.next/
-/out/
+nextjs/.next/
+nextjs/out/
 
 # production
 /build
