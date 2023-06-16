@@ -1,26 +1,27 @@
 'use client';
 
-import { useCompletion } from 'ai/react';
+import { useChat } from 'ai/react';
 
-// TODO: Wrap in server component that redirects if you are not signed in.
-export default function SloganGenerator() {
-  const { completion, input, handleInputChange, handleSubmit } = useCompletion();
+export default function Chat() {
+  const { messages, input, handleInputChange, handleSubmit } = useChat();
 
   return (
-    <div className='mx-auto w-full max-w-md py-24 flex flex-col stretch'>
-      test
+    <div className="mx-auto w-full max-w-md py-24 flex flex-col stretch">
+      {messages.map((m) => (
+        <div key={m.id}>
+          {m.role === 'user' ? 'User: ' : 'AI: '}
+          {m.content}
+        </div>
+      ))}
+
       <form onSubmit={handleSubmit}>
         <input
-          className='w-full max-w-md bottom-0 border border-gray-300 rounded mb-8 shadow-xl p-2'
+          className="w-full max-w-md bottom-0 border border-gray-300 rounded mb-8 shadow-xl p-2"
           value={input}
-          placeholder='Describe your business...'
+          placeholder="Say something..."
           onChange={handleInputChange}
-          style={{color: 'black'}}
         />
       </form>
-      <div>
-        <div className='whitespace-pre-wrap my-6'>{completion}</div>
-      </div>
     </div>
   );
 }
