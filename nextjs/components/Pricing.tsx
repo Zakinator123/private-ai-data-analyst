@@ -72,6 +72,7 @@ export default function Pricing({
     }
   };
 
+  // TODO: Fix this showing "no sub plans found" when there's no network
   if (!products.length)
     return (
       <section className="bg-black">

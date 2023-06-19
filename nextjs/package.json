@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "next lint",
     "stripe:listen": "stripe listen --forward-to=localhost:3000/api/webhooks --project-name=saas-starter",
-    "generate-types": "npx supabase gen types typescript --project-id YOUR_PROJECT_ID --schema public > types_db.ts"
+    "generate-types": "npx supabase gen types typescript --project-id YOUR_PROJECT_ID --schema public > types_db.ts",
+
+    "test": "jest --forceExit --env @edge-runtime/jest-environment .test.ts && jest --forceExit --env node .test.ts"
   },
   "dependencies": {
     "@stripe/stripe-js": "^1.53.0",
@@ -16,16 +18,21 @@
     "@supabase/auth-ui-react": "^0.4.2",
     "@supabase/auth-ui-shared": "^0.1.6",
     "@supabase/supabase-js": "^2.23.0",
-    "ai": "^2.0.1",
+    "openai-edge": "^1.1.0",
     "classnames": "^2.3.2",
     "langchain": "^0.0.95",
     "next": "13.4.6",
-    "openai-edge": "^1.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-merge-refs": "^2.0.2",
     "stripe": "^12.6.0",
-    "tailwindcss": "^3.3.2"
+    "tailwindcss": "^3.3.2",
+
+    "sswr": "^1.10.0",
+    "swrv": "1.0.3",
+    "eventsource-parser": "1.0.0",
+    "nanoid": "^3.3.6",
+    "swr": "2.1.5"
   },
   "devDependencies": {
     "@ianvs/prettier-plugin-sort-imports": "^3.7.2",
@@ -41,7 +48,15 @@
     "prettier": "^2.8.8",
     "prettier-plugin-tailwindcss": "^0.3.0",
     "supabase": "^1.63.1",
-    "typescript": "^5.0.4"
+    "typescript": "^5.0.4",
+
+
+    "@edge-runtime/jest-environment": "1.1.0-beta.31",
+    "@types/jest": "29.2.0",
+    "@types/react-dom": "^18.2.0",
+    "jest": "29.2.1",
+    "ts-jest": "29.0.3",
+    "tsup": "^6.7.0"
   },
   "prettier": {
     "arrowParens": "always",
