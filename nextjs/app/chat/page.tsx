@@ -1,82 +1,78 @@
 'use client';
-import { useState } from 'react';
-import { CreateChatCompletionRequest } from 'openai-edge';
-import { decodeAIStreamChunk } from '@/ai-sdk/packages/core/shared/utils';
+import { nanoid } from 'nanoid';
+import { ChatCompletionFunctions } from 'openai-edge/types/api';
+import { FunctionCallHandler } from 'ai';
+import { useChat } from 'ai/react';
 
-export default function ChatWithFunctionCall() {
-  const [input, setInput] = useState('');
-  const [response, setResponse] = useState('');
 
-  const functions = [
-    {
-      'name': 'get_current_weather',
-      'description': 'Get the current weather',
-      'parameters': {
-        'type': 'object',
-        'properties': {
-          'location': {
-            'type': 'string',
-            'description': 'The city and state, e.g. San Francisco, CA'
-          },
-          'format': {
-            'type': 'string',
-            'enum': ['celsius', 'fahrenheit'],
-            'description': 'The temperature unit to use. Infer this from the users location.'
-          }
+const functions: ChatCompletionFunctions[] = [
+  {
+    'name': 'get_current_weather',
+    'description': 'Get the current weather',
+    'parameters': {
+      'type': 'object',
+      'properties': {
+        'location': {
+          'type': 'string',
+          'description': 'The city and state, e.g. San Francisco, CA'
         },
-        'required': ['location', 'format']
-      }
-    }];
+        'format': {
+          'type': 'string',
+          'enum': ['celsius', 'fahrenheit'],
+          'description': 'The temperature unit to use. Infer this from the users location.'
+        }
+      },
+      'required': ['location', 'format']
+    }
+  }];
 
-  // Make request to openAI API
-  const handleSubmit = async (e: any) => {
-    e.preventDefault()
 
-    const createChatCompletionRequest: CreateChatCompletionRequest = {
-      model: 'gpt-3.5-turbo',
-      messages: [{ role: 'user', content: input }],
-      functions: functions
-    };
+export default function Chat() {
 
-    const res = await fetch('/api/chat/', {
-      method: 'POST',
-      body: JSON.stringify(createChatCompletionRequest)
+  const functionCallHandler: FunctionCallHandler = async (chatMessages, functionCall) => {
+    // if (functionCall.name === 'get_current_weather') {
+
+    if (functionCall.arguments != null) {
+      const parsedFunctionCallArguments = JSON.parse(functionCall.arguments);
+      console.log(parsedFunctionCallArguments);
+    }
+
+    return Promise.resolve({
+      messages: [...chatMessages, {
+        name: 'get_current_weather',
+        id: nanoid(),
+        role: 'function',
+        content: 'The weather is 72 degrees and sunny.',
+      }],
+      functions: functions,
     });
-
-    if (!res.body) {
-      throw new Error('No response body');
-    }
-    let result = '';
-    const reader = res.body.getReader();
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) {
-        break;
-      }
-      // Update the chat state with the new message tokens.
-      result += decodeAIStreamChunk(value);
-    }
-
-    setResponse(result);
+    // }
   };
 
+  const { messages, input, handleInputChange, handleSubmit } = useChat({ experimental_onFunctionCall: functionCallHandler });
 
   return (
     <div className='mx-auto w-full max-w-md py-24 flex flex-col stretch'>
-      <form onSubmit={(e) => handleSubmit(e)}>
-        <input
-          className='w-full max-w-md bottom-0 border border-gray-300 rounded mb-8 shadow-xl p-2'
-          value={input}
-          placeholder='Say something...'
-          onChange={(e) => setInput(e.target.value)}
-          style={{ color: 'black' }}
-        />
-      </form>
 
-      {<div>
-        {response}
-      </div>}
+      <form onSubmit={(e) => handleSubmit(e, {functions})}>
+        <label>
+          Say something...
+          <input
+            className='w-full max-w-md bottom-0 border border-gray-300 rounded mb-8 shadow-xl p-2'
+            value={input}
+            onChange={handleInputChange}
+            style={{ color: 'black' }}
+          />
+        </label>
+        <button type='submit'>Send</button>
+      </form>
+      {messages.map(m => (
+        <div key={m.id}>
+          {m.role}:&nbsp;
+          {(m.content === '') ? (typeof m.function_call === 'string' ? m.function_call : JSON.stringify(m.function_call) ) : m.content}
+          <br/>
+        </div>
+      ))}
     </div>
   );
 }
