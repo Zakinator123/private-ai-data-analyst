@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
+  '@sqlite.org/sqlite-wasm':
+    specifier: ^3.42.0-build4
+    version: 3.42.0-build4
   '@stripe/stripe-js':
     specifier: ^1.53.0
     version: 1.53.0
@@ -1227,6 +1230,13 @@ packages:
       '@sinonjs/commons': 1.8.6
     dev: true
 
+  /@sqlite.org/sqlite-wasm@3.42.0-build4:
+    resolution: {integrity: sha512-wuG0vS1C8YvsGVPOgAsm47faP4/VLiZA+Ji9iegM0Z4loOB0C4S8/GXKVlMU+p8apkF1i5ncUtkyWv1DbGPKWQ==}
+    hasBin: true
+    optionalDependencies:
+      comlink: 4.4.1
+    dev: false
+
   /@stitches/core@1.2.8:
     resolution: {integrity: sha512-Gfkvwk9o9kE9r9XNBmJRfV8zONvXThnm1tcuojL04Uy5uRyqg93DC83lDebl0rocZCfKSjUv+fWYtMQmEDJldg==}
     dev: false
@@ -2129,6 +2139,12 @@ packages:
     dependencies:
       delayed-stream: 1.0.0
     dev: false
+
+  /comlink@4.4.1:
+    resolution: {integrity: sha512-+1dlx0aY5Jo1vHy/tSsIGpSkN4tS9rZSW8FIhG0JH/crs9wwweswIo/POr451r7bZww3hFbPAKnTpimzL/mm4Q==}
+    requiresBuild: true
+    dev: false
+    optional: true
 
   /commander@10.0.1:
     resolution: {integrity: sha512-y4Mg2tXshplEbSGzx7amzPwKKOCGuoSRP/CjEdwwk0FOGlUbq6lKuoyDZTNZkmxHdJtp54hdfY/JUrdL7Xfdug==}
