@@ -5,27 +5,8 @@ import { FunctionCallHandler, Message } from 'ai';
 import { useChat } from 'ai/react';
 import { useEffect } from 'react';
 
-const functions: ChatCompletionFunctions[] = [
-  {
-    name: 'eval_code_in_browser',
-    description: 'Execute javascript code in the browser with eval().',
-    parameters: {
-      type: 'object',
-      properties: {
-        code: {
-          type: 'string',
-          description: `Javascript code that will be directly executed via eval(). Do not use backticks in your response.
-           DO NOT include any newlines in your response, and be sure to provide only valid JSON when providing the arguments object.
-           The output of the eval() will be returned directly by the function.`
-        }
-      },
-      required: ['code']
-    }
-  }
-]
-
 export default function Chat() {
-  const logHtml = function (cssClass, ...args) {
+  const logHtml = function (cssClass: any, ...args: any) {
     const ln = document.createElement('div');
     if (cssClass) {
       ln.classList.add(cssClass);
@@ -55,38 +36,81 @@ export default function Chat() {
     };
   }, []);
 
+
   const functionCallHandler: FunctionCallHandler = async (
     chatMessages,
     functionCall
   ) => {
-    if (functionCall.name === 'eval_code_in_browser') {
+    if (functionCall.name === 'create_and_execute_javascript_program') {
       if (functionCall.arguments) {
         // Parsing here does not always work since it seems that some characters in generated code aren't escaped properly.
         const parsedFunctionCallArguments: { code: string } = JSON.parse(
           functionCall.arguments
-        );
+        )
+        const result = eval(parsedFunctionCallArguments.code)
         const functionResponse = {
           messages: [
             ...chatMessages,
             {
               id: nanoid(),
-              name: 'eval_code_in_browser',
+              name: 'create_and_execute_javascript_program',
               role: 'function' as const,
-              content: JSON.stringify(eval(parsedFunctionCallArguments.code))
+              content: result.toString(),
             }
           ]
-        };
-        return functionResponse;
+        }
+        return functionResponse
       }
     }
-  };
+  }
+
+
+  const functions: ChatCompletionFunctions[] = [
+    {
+      name: 'create_and_execute_javascript_program',
+      description: `Create and execute a Javascript program that will be executed in the browser. Do not import any libraries.
+      The result of the last expression that gets evaluated in the program is what will be returned by the program when it is executed.
+      Feel free to use DOM or Web APIs. DO NOT add any formatting in your code.`,
+      parameters: {
+        type: 'object',
+        properties: {
+          // purpose: {
+          //   type: 'string',
+          //   description: 'What is the purpose of this program?'
+          // },
+          code: {
+            type: 'string',
+            description: `Javascript code that will be executed. Do not use any formatting, backticks or newlines in your response.`
+          }
+        },
+        required: ['code']
+      }
+    }
+  ]
 
   const {
     messages,
     input,
     handleInputChange,
     handleSubmit
-  } = useChat({ experimental_onFunctionCall: functionCallHandler });
+  } = useChat({
+    initialMessages: [
+      {
+        id: nanoid(),
+        role: 'system' as const,
+        content: `You are an AI assistant that is capable of executing javascript code in the browser. 
+        You are helpful and do as you are told with the capabilities that you have.`
+      }
+      //   {
+      //     id: nanoid(),
+      //     role: 'system' as const,
+      //     content: `You are an AI data scientist and assistant with access to a SQLite database.
+      //      This database has been derived from an Airtable base so that it can be easily queried with SQL.
+      //      You have the ability to create and execute complex Javascript programs that contain SQL queries, data transformations, and/or data visualizations.`
+      //   }
+    ],
+    experimental_onFunctionCall: functionCallHandler
+  });
 
 
   // Generate a map of message role to text color
