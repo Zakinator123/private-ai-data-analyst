@@ -9,7 +9,7 @@ const nextConfig = {
   async headers() {
     return [
       {
-        source: '/function-calling',
+        source: '/chat',
         headers: [
           {
             key: 'Cross-Origin-Opener-Policy',

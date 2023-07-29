@@ -3,6 +3,7 @@ import { nanoid } from 'nanoid';
 import { ChatCompletionFunctions } from 'openai-edge/types/api';
 import { FunctionCallHandler, Message } from 'ai';
 import { useChat } from 'ai/react';
+import { useEffect } from 'react';
 
 const functions: ChatCompletionFunctions[] = [
   {
@@ -24,6 +25,36 @@ const functions: ChatCompletionFunctions[] = [
 ]
 
 export default function Chat() {
+  const logHtml = function (cssClass, ...args) {
+    const ln = document.createElement('div');
+    if (cssClass) {
+      ln.classList.add(cssClass);
+    }
+    ln.append(document.createTextNode(args.join(' ')));
+
+    const loggingElement = document.getElementById('logging');
+    if(loggingElement) {
+      loggingElement.append(ln);
+    } else {
+      console.error('Element with id "logging" not found');
+    }
+  };
+
+
+  useEffect(() => {
+    const worker = new Worker(new URL("./worker.js", import.meta.url));
+
+    worker.onmessage = function ({ data }) {
+      switch (data.type) {
+        case 'log':
+          logHtml(data.payload.cssClass, ...data.payload.args);
+          break;
+        default:
+          logHtml('error', 'Unhandled message:', data.type);
+      }
+    };
+  }, []);
+
   const functionCallHandler: FunctionCallHandler = async (
     chatMessages,
     functionCall
@@ -85,32 +116,37 @@ export default function Chat() {
   }
 
   return (
-    <div className="flex flex-col w-full max-w-md py-24 mx-auto stretch">
-      {messages.length > 0
-        ? messages.map((m: Message) => (
-          <div
-            key={m.id}
-            className="whitespace-pre-wrap"
-            style={{ color: roleToColorMap[m.role] }}
-          >
-            <strong>{`${m.role}: `}</strong>
-            {getRenderedMessage(m)}
-            <br />
-            <br />
-          </div>
-        ))
-        : null}
-      <div id="chart-goes-here"></div>
+    <div className="flex flex-row w-full max-w-lg py-24 mx-auto stretch space-x-4">
+      <div className="flex flex-col w-1/2">
+        {messages.length > 0
+          ? messages.map((m: Message) => (
+            <div
+              key={m.id}
+              className="whitespace-pre-wrap"
+              style={{ color: roleToColorMap[m.role] }}
+            >
+              <strong>{`${m.role}: `}</strong>
+              {getRenderedMessage(m)}
+              <br />
+              <br />
+            </div>
+          ))
+          : null}
 
-      <form onSubmit={e => handleSubmit(e, {functions})}>
-        <input
-          className="bottom-0 w-full max-w-md p-2 mb-8 border border-gray-300 rounded shadow-xl"
-          value={input}
-          placeholder="Say something..."
-          onChange={handleInputChange}
-          style={{ color: 'black' }}
-        />
-      </form>
+        <form onSubmit={e => handleSubmit(e, {functions})}>
+          <input
+            className="bottom-0 w-full max-w-md p-2 mb-8 border border-gray-300 rounded shadow-xl"
+            value={input}
+            placeholder="Say something..."
+            onChange={handleInputChange}
+            style={{ color: 'black' }}
+          />
+        </form>
+      </div>
+
+      <div className="flex flex-col w-1/2">
+        <div id="logging"></div>
+      </div>
     </div>
   )
 }
