@@ -32,10 +32,13 @@ export default async function Navbar() {
                 <Link href="/account" className={s.link}>
                   Account
                 </Link>
-                  <Link href='/chat' className={s.link}>
-                    Chat
-                  </Link>
-                </>
+                <Link href='/chat' className={s.link}>
+                  Chat
+                </Link>
+                <Link href="/assistants" className={s.link}>
+                  Assistant
+                </Link>
+              </>
               )}
             </nav>
           </div>
