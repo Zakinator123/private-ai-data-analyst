@@ -1,42 +1,38 @@
-import { NextApiRequest, NextApiResponse } from 'next';
-import OpenAI from "openai";
+import { NextRequest, NextResponse } from 'next/server';
+import OpenAI from 'openai';
 
 const openai = new OpenAI();
 
 export const runtime = 'edge';
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === 'POST') {
-    // Handle POST request
-    try {
-      const thread = await openai.beta.threads.create();
-      return res.json({ thread_id: thread.id });
-    } catch (error) {
-      if (error instanceof Error) {
-        return res.status(500).json({ error: error.message });
-      }
-      return res.status(500).json({ error: 'An unknown error occurred' });
+export async function POST(req: NextRequest) {
+  try {
+    const thread = await openai.beta.threads.create();
+    return NextResponse.json({ thread_id: thread.id });
+  } catch (error) {
+    if (error instanceof Error) {
+      return new NextResponse(JSON.stringify({ error: error.message }), { status: 500 });
+    } else {
+      return new NextResponse(JSON.stringify({ error: 'An unknown error occurred' }), { status: 500 });
     }
-  } else if (req.method === 'GET') {
-    // Handle GET request
-    const { threadId } = req.query;
+  }
+}
 
-    if (!threadId || typeof threadId !== 'string') {
-      return res.status(400).json({ error: "Missing or invalid 'threadId' query parameter" });
-    }
+export async function GET(req: NextRequest) {
+  const { threadId } = req.nextUrl.searchParams;
 
-    try {
-      const retrievedMessages = await openai.beta.threads.messages.list(threadId);
-      return res.json(retrievedMessages);
-    } catch (error) {
-      if (error instanceof Error) {
-        return res.status(500).json({ error: error.message });
-      }
-      return res.status(500).json({ error: 'An unknown error occurred' });
+  if (!threadId) {
+    return new NextResponse(JSON.stringify({ error: "Missing 'threadId' query parameter" }), { status: 400 });
+  }
+
+  try {
+    const retrievedMessages = await openai.beta.threads.messages.list(threadId);
+    return NextResponse.json(retrievedMessages);
+  } catch (error) {
+    if (error instanceof Error) {
+      return new NextResponse(JSON.stringify({ error: error.message }), { status: 500 });
+    } else {
+      return new NextResponse(JSON.stringify({ error: 'An unknown error occurred' }), { status: 500 });
     }
-  } else {
-    // Handle other HTTP methods
-    res.setHeader('Allow', ['GET', 'POST']);
-    return res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 }
