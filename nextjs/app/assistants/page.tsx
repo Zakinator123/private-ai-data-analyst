@@ -1,91 +1,18 @@
 'use client';
 
 import React, { useState } from 'react';
-
-
-
-interface MessageContent {
-  type: string;
-  text: {
-    value: string;
-    annotations: any[]; // Define more specific type if you have the structure
-  };
-}
-
-interface Message {
-  id: string;
-  role: string;
-  content: MessageContent[];
-}
-
-interface FetchMessagesResponse {
-  body: {
-    data: Message[];
-  };
-}
-
-interface DisplayMessage {
-  id: string;
-  role: string;
-  content: string;
-  type: string;
-}
-
+import { OpenAIAssistantsServiceImpl } from './assistants-service';
+import { ThreadMessage } from 'openai/resources/beta/threads/messages/messages';
 
 export default function Assistants() {
   const [assistantId, setAssistantId] = useState('asst_hjxcyeUYlS35M63B2MrtrEDx');
   const [threadId, setThreadId] = useState('thread_FZ7Zv4I80a7PxdR4mM7yy71l');
   const [message, setMessage] = useState('');
-  const [messages, setMessages] = useState<DisplayMessage[]>([]);
+  // TODO: Bring in my own type here to replace ThreadMessage
+  const [messages, setMessages] = useState<ThreadMessage[]>([]);
 
-  const fetchMessages = async () => {
-    if (!threadId) return;
-    const response = await fetch(`/api/messages?threadId=${threadId}`);
-    const data: FetchMessagesResponse = await response.json();
-    const parsedMessages: DisplayMessage[] = data.body.data.map(msg => ({
-      id: msg.id,
-      role: msg.role,
-      content: msg.content.map(c => c.text.value).join(' '),
-      type: msg.content.map(c => c.type).join(', ')
-    }));
-    setMessages(parsedMessages);
-  };
-
-  const createAssistant = async () => {
-    const response = await fetch('/api/assistants', { method: 'POST' });
-    const data = await response.json();
-    setAssistantId(data.assistant_id);
-  };
-
-  const createThread = async () => {
-    const response = await fetch('/api/threads', { method: 'POST' });
-    const data = await response.json();
-    setThreadId(data.thread_id);
-  };
-
-  const initiateRun = async () => {
-    if (!assistantId || !threadId) return;
-    await fetch('/api/runs', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ thread_id: threadId, assistant_id: assistantId }),
-    });
-  };
-
-  const createMessage = async () => {
-    if (!threadId || !message) return;
-    await fetch('/api/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ thread_id: threadId, message: message }),
-    });
-    setMessage('');
-    fetchMessages();
-  };
+  // TODO: Inject using DI
+  const assistantsService = new OpenAIAssistantsServiceImpl(process.env.NEXT_PUBLIC_OPENAI_API_KEY!);
 
   return (
     <div className="flex flex-row w-full max-w-lg py-24 mx-auto stretch space-x-4">
@@ -93,48 +20,52 @@ export default function Assistants() {
         {assistantId && <p>Assistant ID: {assistantId}</p>}
         {threadId && <p>Thread ID: {threadId}</p>}
 
-        <button 
+        <button
           className="bg-green-500 text-white font-bold py-2 px-4 rounded mb-2 hover:bg-green-600"
-          onClick={createAssistant}>
+          onClick={async () => setAssistantId(await assistantsService.createAssistant())}>
           Create Assistant
         </button>
-        <button 
+        <button
           className="bg-blue-500 text-white font-bold py-2 px-4 rounded mb-2 hover:bg-blue-600"
-          onClick={createThread}>
+          onClick={async () => setThreadId(await assistantsService.createThread())}>
           Create Thread
         </button>
-        <button 
+        <button
           className="bg-purple-500 text-white font-bold py-2 px-4 rounded mb-2 hover:bg-purple-600"
-          onClick={initiateRun}>
+          onClick={async () => assistantsService.initiateRun(threadId, assistantId)}>
           Initiate Run
         </button>
-        <textarea 
+        <textarea
           className="px-3 py-2 border rounded border-gray-300 mb-2 text-black"
-          value={message} 
-          onChange={(e) => setMessage(e.target.value)} 
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
           placeholder="Type a message"
           rows={3}
         />
-        <button 
+        <button
           className="bg-red-500 text-white font-bold py-2 px-4 rounded hover:bg-red-600"
-          onClick={createMessage}>
+          onClick={() => {
+            assistantsService.createMessage(threadId, message)
+            setMessage('');
+          }}>
           Send Message
         </button>
-        <button 
+        <button
           className="bg-yellow-500 text-white font-bold py-2 px-4 rounded hover:bg-yellow-600"
-          onClick={fetchMessages}>
+          onClick={async () => setMessages(await assistantsService.fetchMessages(threadId))}>
           Refresh Messages
         </button>
         <div className="mt-4">
           <h3 className="text-lg font-bold">Messages:</h3>
           <ul>
-            {messages.map((msg, index) => (
-              <li key={index} className="mb-2">
-                <p><strong>Role:</strong> {msg.role}</p>
-                <p><strong>Type:</strong> {msg.type}</p>
-                <p><strong>Content:</strong> {msg.content}</p>
-              </li>
-            ))}
+            {messages.map((msg, index) => {
+              if (msg.content[0].type === 'text') {
+                return (<li key={index} className="mb-2">
+                  <p><strong>Role:</strong> {msg.role}</p>
+                  <p><strong>Content:</strong> {msg.content[0].text.value}</p>
+                </li>)
+              }
+            })}
           </ul>
         </div>
       </div>
